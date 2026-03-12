@@ -54,17 +54,16 @@ Block Render: Position * <--> 1 User
 
 # Name is available. Steps to publish:
            
-  # 1. Login (once)                                                                                                                                    
-  bun login        # or: npm login                                                                                                                     
-                                                                                                                                                       
-  # 2. Build latest dist                                                                                                                               
-  bun run build                                                                                                                                        
-                                                                                                                                                       
-  # 3. Publish                                                                                                                                         
+  # 1. Login (once)
+  bun login        # or: npm login
+  
+  # 2. Build latest dist
+  bun run build
+
+  # 3. Publish
   bun publish
 
-  bun publish is equivalent to npm publish — it reads package.json, uploads only the files listed (dist/), and pushes to the npm registry. With the
-  files field set, the published package will contain only:
+  bun publish is equivalent to npm publish — it reads package.json, uploads only the files listed (dist/), and pushes to the npm registry. With the files field set, the published package will contain only:
   dist/sto-diagram.js        (ESM, 54 KB)
   dist/sto-diagram.umd.js    (UMD, 54 KB)
   package.json
