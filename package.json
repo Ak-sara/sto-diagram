@@ -1,0 +1,31 @@
+{
+  "name": "@ak-sara/sto-diagram",
+  "version": "0.1.0",
+  "description": "SVG block/hierarchy diagram renderer for org structures",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/sto-diagram.umd.js",
+  "module": "dist/sto-diagram.js",
+  "exports": {
+    ".": {
+      "import": "./dist/sto-diagram.js",
+      "require": "./dist/sto-diagram.umd.js"
+    }
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c --watch"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^2.0.4"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "rollup": "^4.0.0"
+  }
+}
