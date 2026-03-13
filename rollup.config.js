@@ -16,7 +16,7 @@ export default [
   {
     input: 'src/index.js',
     output: {
-      file: 'dist/sto-diagram.umd.js',
+      file: 'dist/sto-diagram.ak-sara.js',
       format: 'umd',
       name: 'StoDiagram',
       exports: 'named',

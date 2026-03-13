@@ -1,40 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StoChart Demo</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f0f4f8; font-family: sans-serif; }
+# Ak-Sara Organisation Structure Diagram
 
-    #toolbar {
-      position: fixed; top: 12px; left: 12px; z-index: 10;
-      display: flex; gap: 8px;
-    }
-    #toolbar button {
-      padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc;
-      background: #fff; cursor: pointer; font-size: 13px;
-    }
-    #toolbar button:hover { background: #e8f0fe; }
+This is a library to create Organisation Structure in 2 step, first we design the Structure(parent-child-group) of an Organization, then we assign user to some node in that design to finalize the presentation.
 
-    #chart { width: 100vw; height: 100vh; }
-    .sto-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-  </style>
-</head>
-<body>
+The rendered node is using svg <g> and we can use its 'data-id' to add event to the node.
 
-<div id="toolbar">
-  <button onclick="chart.render()">Re-render</button>
-</div>
+## UMD Usage Example
 
-<div id="chart"></div>
+<script src="https://cdn.jsdelivr.net/npm/@ak-sara/sto-diagram@0.1.0/dist/sto-diagram.ak-sara.js"></script>
 
-<!-- build this file first: npm run build -->
-<script src="dist/sto-diagram.ak-sara.js"></script>
-<script>
-  const { StoChart } = StoDiagram
-  // --- sample data (mimics org_organizational_units from DB) ---
+<div id="chart" style="width:100vw;height:100vh"></div>
+
+```javascript
+const { StoChart } = StoDiagram
   const data = [
     // ── Logical Directorate group ─────────────────────────────────────────
     { id: 'dir-corp', label: 'Directorate', type: 'logical-group', role: 'ceo' },
@@ -44,13 +21,13 @@
     { id: 'cco', label: 'Chief Commercial Officer', type: 'block', parentId: 'ceo', groupId: 'dir-corp' },
     { id: 'cfo', label: 'Chief Financial Officer', type: 'block', parentId: 'ceo', groupId: 'dir-corp' },
 
-    // ── neck / staff nodes (attached to Direktur Utama) ───────────────────
+    // ── neck nodes (attached to Chief Executive Officer) ───────────────────
     { id: 'neck-grp', label: ' ', type: 'logical-group', parentId: 'ceo', edge: 'neck'},
     { id: 'ia', label: 'Internal Audits', groupId: 'neck-grp', picId:'cfo'},
 
     { id: 'acc',  label: 'Accounting', type: 'block', parentId: 'cfo'},
-    
   ]
+  // adding user data from database, it is rendered inside nodes as html, after the stuctural design is done
   var userCard=`<div style="display:flex;gap:10px;align-items:center;height:100%">
               <div><img src="{image}" class="sto-avatar"/></div>
               <div style="overflow:hidden">
@@ -59,16 +36,21 @@
                 <div style="color:#2c7be5;font-size:11px;font-weight:600">{level}</div>
               </div>
             </div>`;
-
+  
   const user=[
     {stoid: 'cfo', name:"Amelia", title:"Chief Financial Officer", level:"Level I", image:"1.gif"},
-    {stoid: 'lgh', name:"Budi Santoso",title:"Risk Departement Group Head",level:"Level III", image:"2.jpg"},
   ]
   const chart = new StoChart('#chart')
   chart.load(data)
        .assign(user, userCard, { width: 200, height: 90 })
        .render()
-</script>
+```
 
-</body>
-</html>
+## ESM guide
+```bash
+npm i @ak-sara/sto-diagram
+```
+
+```javascript
+import { StoChart } from 'sto-diagram'
+```
