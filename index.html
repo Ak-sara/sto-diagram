@@ -37,18 +37,42 @@
   // --- sample data (mimics org_organizational_units from DB) ---
   const data = [
     // ── Logical Directorate group ─────────────────────────────────────────
-    { id: 'dir-corp', label: 'Directorate', type: 'logical-group', role: 'ceo' },
+    // type:'logical-group' = invisible container rendered as background rect
+    { id: 'dir-corp', label: 'Directorate', type: 'logical-group', parentId: null, role: 'du' },
 
     // members of the logical group (groupId links them into the compound)
-    { id: 'ceo', label: 'Chief Executive Officer', type: 'block', groupId: 'dir-corp' },
-    { id: 'cco', label: 'Chief Commercial Officer', type: 'block', parentId: 'ceo', groupId: 'dir-corp' },
-    { id: 'cfo', label: 'Chief Financial Officer', type: 'block', parentId: 'ceo', groupId: 'dir-corp' },
+    // role:'head' = Direktur Utama gets a colored top-bar to distinguish him
+    { id: 'du', label: 'Direktur Utama',  type: 'block', parentId: 'dir-corp', groupId: 'dir-corp', edge: 'regular' },
+    { id: 'dc', label: 'Dir. Komersial',  type: 'block', parentId: 'du',groupId: 'dir-corp', edge: 'regular' },
+    { id: 'dr', label: 'Dir. Risiko',     type: 'block', parentId: 'du',groupId: 'dir-corp', edge: 'regular' },
+    { id: 'do', label: 'Dir. Operasi',   type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
+    { id: 'dk', label: 'Dir. Keuangan',  type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
+    { id: 'dh', label: 'Dir. SDM',       type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
 
     // ── neck / staff nodes (attached to Direktur Utama) ───────────────────
-    { id: 'neck-grp', label: ' ', type: 'logical-group', parentId: 'ceo', edge: 'neck'},
-    { id: 'ia', label: 'Internal Audits', groupId: 'neck-grp', picId:'cfo'},
+    { id: 'neck-grp', label: ' ', type: 'logical-group', parentId: 'du', edge: 'neck' },
+    { id: 'ia', label: 'Internal Audit',      type: 'neck', parentId: null, groupId: 'neck-grp'},
+    { id: 'cs', label: 'Corporate Secretary', type: 'neck', parentId: null, groupId: 'neck-grp'},
 
-    { id: 'acc',  label: 'Accounting', type: 'block', parentId: 'cfo'},
+    // ── children of Dir. Komersial ────────────────────────────────────────
+    { id: 'sbu', label: 'SBU Cargo & Logistics',  type: 'logical-group', parentId: 'dir-corp', picId:'dc' },
+    { id: 'cd',  label: 'Commercial Development', type: 'block', parentId: 'dc', edge: 'regular' },
+    { id: 'cdv',  label: 'Partner Management', type: 'block', parentId: 'cd', edge: 'regular' },
+    { id: 'cdp',  label: 'Product Management', type: 'block', parentId: 'cd', edge: 'regular' },
+
+    // inside SBU
+    { id: 'scs', label: 'Cargo Service',    type: 'block', groupId: 'sbu', edge: 'regular' },
+    { id: 'log', label: 'Logistics',        type: 'block', groupId: 'sbu', edge: 'regular' },
+    { id: 'cbe', label: 'Comm. & Biz Exc.', type: 'block', groupId: 'sbu', edge: 'regular' },
+
+    // ── children of Dir. Risiko ───────────────────────────────────────────
+    { id: 'ddr', label: 'Direktorat DR',  type: 'logical-group', parentId: 'dr'},
+    { id: 'rm', label: 'Risk Management', type: 'block', groupId: 'ddr', edge: 'regular' },
+    { id: 'lg', label: 'Legal',           type: 'group', groupId: 'ddr', edge: 'regular', head:'lgh' },
+    { id: 'lgh', label: 'Legal Group Head', type: 'block', groupId: 'lg', edge: 'regular' },
+    { id: 'ldp', label: 'Unit Pidana', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh' },
+    { id: 'ldd', label: 'Unit Perdata', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh'  },
+
     
   ]
   var userCard=`<div style="display:flex;gap:10px;align-items:center;height:100%">
@@ -61,7 +85,7 @@
             </div>`;
 
   const user=[
-    {stoid: 'cfo', name:"Amelia", title:"Chief Financial Officer", level:"Level I", image:"1.gif"},
+    {stoid: 'dk', name:"Amelia", title:"Chief Financial Officer", level:"Level I", image:"1.gif"},
     {stoid: 'lgh', name:"Budi Santoso",title:"Risk Departement Group Head",level:"Level III", image:"2.jpg"},
   ]
   const chart = new StoChart('#chart')
