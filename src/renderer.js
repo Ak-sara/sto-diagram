@@ -35,10 +35,9 @@ function svgEl(tag, attrs = {}, parent = null) {
   return e
 }
 
-// ── resolve head id from logical-group data ───────────────────────────────────
+// ── resolve head id from group/logical-group data ────────────────────────────
 function resolveHeadId(groupData, nodeMap) {
   if (groupData.head && nodeMap.has(groupData.head)) return groupData.head
-  if (groupData.role && nodeMap.has(groupData.role)) return groupData.role
   return null
 }
 
@@ -283,7 +282,7 @@ function drawAllBlocks(nodes, offX, offY, nodeMap, nodeLayer, inheritedHeadId) {
       const headId = resolveHeadId(data, nodeMap)
       drawAllBlocks(n.children, ax, ay, nodeMap, nodeLayer, headId)
     } else {
-      const isHead = n.id === inheritedHeadId || data.role === 'head'
+      const isHead = n.id === inheritedHeadId
       drawBlock(ax, ay, data, n, isHead, nodeLayer)
     }
   })

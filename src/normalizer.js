@@ -7,9 +7,8 @@ export const DEFAULT_NODE_HEIGHT = 60
  *   id:        string
  *   label:     string
  *   type:      'block' | 'neck' | 'group' | 'logical-group'
- *   role:      string?  — 'head' on a block → colored top bar
- *   head:      string?  — same as role but named more clearly
- *   groupId:   string?  — id of a logical-group this node is a member of
+ *   head:      string?  — id of the head child node inside a group/logical-group (gets colored top bar)
+ *   groupId:   string?  — id of a group/logical-group this node is a member of (explicit; use when parentId differs)
  *   parentId:  string?  — hierarchical parent
  *   edge:      'regular' | 'neck' | null
  *   picId:     string?  — mentor/pic node id; creates a 'pic' edge
@@ -44,10 +43,10 @@ export function normalize(nodes) {
     if (n.groupId && containerChildren.has(n.groupId)) {
       containerChildren.get(n.groupId).add(n.id)
     }
-    // implicit membership (group — direct parentId children)
+    // implicit membership (group or logical-group — direct parentId children)
     if (n.parentId && containerChildren.has(n.parentId)) {
       const parentData = nodeMap.get(n.parentId)
-      if (parentData?.type === 'group') {
+      if (parentData?.type === 'group' || parentData?.type === 'logical-group') {
         containerChildren.get(n.parentId).add(n.id)
       }
     }
@@ -67,7 +66,8 @@ export function normalize(nodes) {
       if (!n.parentId || childOf.has(n.id) || containerIds.has(n.id)) return
       const parentContainerId = childOf.get(n.parentId)
       if (!parentContainerId) return
-      if (nodeMap.get(parentContainerId)?.type !== 'group') return
+      const parentContainerType = nodeMap.get(parentContainerId)?.type
+      if (parentContainerType !== 'group' && parentContainerType !== 'logical-group') return
       containerChildren.get(parentContainerId).add(n.id)
       childOf.set(n.id, parentContainerId)
       changed = true

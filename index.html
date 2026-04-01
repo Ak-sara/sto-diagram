@@ -42,34 +42,34 @@
 
     // members of the logical group (groupId links them into the compound)
     // role:'head' = Direktur Utama gets a colored top-bar to distinguish him
-    { id: 'du', label: 'Direktur Utama',  type: 'block', parentId: 'dir-corp', groupId: 'dir-corp', edge: 'regular' },
-    { id: 'dc', label: 'Dir. Komersial',  type: 'block', parentId: 'du',groupId: 'dir-corp', edge: 'regular' },
-    { id: 'dr', label: 'Dir. Risiko',     type: 'block', parentId: 'du',groupId: 'dir-corp', edge: 'regular' },
-    { id: 'do', label: 'Dir. Operasi',   type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
-    { id: 'dk', label: 'Dir. Keuangan',  type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
-    { id: 'dh', label: 'Dir. SDM',       type: 'block', parentId: 'du', groupId: 'dir-corp', edge: 'regular' },
+    { id: 'du', label: 'Direktur Utama', type: 'block', edge: 'regular', parentId: 'dir-corp', groupId: 'dir-corp' },
+    { id: 'dc', label: 'Dir. Komersial', type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
+    { id: 'dr', label: 'Dir. Risiko',    type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
+    { id: 'do', label: 'Dir. Operasi',   type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
+    { id: 'dk', label: 'Dir. Keuangan',  type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
+    { id: 'dh', label: 'Dir. SDM',       type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
 
     // ── neck / staff nodes (attached to Direktur Utama) ───────────────────
-    { id: 'neck-grp', label: ' ', type: 'logical-group', parentId: 'du', edge: 'neck' },
+    { id: 'neck-grp', label: ' ', type: 'logical-group', edge: 'neck', parentId: 'du' },
     { id: 'ia', label: 'Internal Audit',      type: 'neck', parentId: null, groupId: 'neck-grp'},
     { id: 'cs', label: 'Corporate Secretary', type: 'neck', parentId: null, groupId: 'neck-grp'},
 
     // ── children of Dir. Komersial ────────────────────────────────────────
-    { id: 'sbu', label: 'SBU Cargo & Logistics',  type: 'logical-group', parentId: 'dir-corp', picId:'dc' },
-    { id: 'cd',  label: 'Commercial Development', type: 'block', parentId: 'dc', edge: 'regular' },
-    { id: 'cdv',  label: 'Partner Management', type: 'block', parentId: 'cd', edge: 'regular' },
-    { id: 'cdp',  label: 'Product Management', type: 'block', parentId: 'cd', edge: 'regular' },
+    { id: 'sbu', label: 'SBU Cargo & Logistics',  type: 'group', parentId: 'dir-corp', picId:'dc' },
+    { id: 'cd',  label: 'Commercial Development', type: 'block', edge: 'regular', parentId: 'dc' },
+    { id: 'cdv',  label: 'Partner Management', type: 'block', edge: 'regular', parentId: 'cd' },
+    { id: 'cdp',  label: 'Product Management', type: 'block', edge: 'regular', parentId: 'cd' },
 
     // inside SBU
-    { id: 'scs', label: 'Cargo Service',    type: 'block', groupId: 'sbu', edge: 'regular' },
-    { id: 'log', label: 'Logistics',        type: 'block', groupId: 'sbu', edge: 'regular' },
-    { id: 'cbe', label: 'Comm. & Biz Exc.', type: 'block', groupId: 'sbu', edge: 'regular' },
+    { id: 'scs', label: 'Cargo Service',    type: 'block', edge: 'regular', groupId: 'sbu'},
+    { id: 'log', label: 'Logistics',        type: 'block', edge: 'regular', groupId: 'sbu' },
+    { id: 'cbe', label: 'Comm. & Biz Exc.', type: 'block', edge: 'regular', groupId: 'sbu' },
 
     // ── children of Dir. Risiko ───────────────────────────────────────────
     { id: 'ddr', label: 'Direktorat DR',  type: 'logical-group', parentId: 'dr'},
-    { id: 'rm', label: 'Risk Management', type: 'block', groupId: 'ddr', edge: 'regular' },
-    { id: 'lg', label: 'Legal',           type: 'group', groupId: 'ddr', edge: 'regular', head:'lgh' },
-    { id: 'lgh', label: 'Legal Group Head', type: 'block', groupId: 'lg', edge: 'regular' },
+    { id: 'rm', label: 'Risk Management', type: 'block', edge: 'regular', groupId: 'ddr'  },
+    { id: 'lg', label: 'Legal',           type: 'group', edge: 'regular', groupId: 'ddr',  head:'lgh' },
+    { id: 'lgh', label: 'Legal Group Head', type: 'block', edge: 'regular',groupId: 'lg'  },
     { id: 'ldp', label: 'Unit Pidana', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh' },
     { id: 'ldd', label: 'Unit Perdata', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh'  },
 
