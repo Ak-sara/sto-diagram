@@ -10,16 +10,6 @@ const COLORS = {
     headBar: '#2c7be5', headText: '#ffffff',
     anchor: '#2c7be5', neckAnchor: '#e67e22',
   },
-  group: {
-    fill: '#eff6ff', stroke: '#1d4ed8', strokeWidth: 2.5,
-    headBar: '#1d4ed8', headText: '#ffffff',
-    anchor: '#1d4ed8', neckAnchor: '#e67e22',
-  },
-  neck: {
-    fill: '#fff7f0', stroke: '#e67e22', strokeWidth: 1.5,
-    headBar: '#c0571a', headText: '#ffffff',
-    anchor: '#e67e22', neckAnchor: '#e67e22',
-  },
 }
 
 const EDGE_STYLE = {
@@ -55,7 +45,7 @@ function buildAbsPosMap(nodes, offX, offY, result) {
 // isSource: true = outgoing (bottom border), false = incoming (top border)
 // edgeType: 'regular' | 'neck' | 'pic'
 function anchorPoint(pos, nodeData, isSource, edgeType) {
-  const isContainer = nodeData.type === 'logical-group' || nodeData.type === 'group'
+  const isContainer = nodeData.type === 'group' || nodeData.type === 'logical' || nodeData.type === 'neck'
   // ±8 offset rules (same for both blocks and containers):
   //   source bottom: neck/pic → +8 (right),  regular → -8 (left)
   //   target top:    pic      → +8 (right),  others  → -8 (left)
@@ -161,20 +151,8 @@ function drawBlock(ax, ay, data, elkNode, isHead, nodeLayer) {
   svgEl('rect', { x: 0, y: 0, width, height, rx: 5, ry: 5,
     fill: colors.fill, stroke: colors.stroke,
     'stroke-width': colors.strokeWidth,
-    'stroke-dasharray': type === 'neck' ? '6,3' : 'none',
+    'stroke-dasharray': 'none',
   }, g)
-
-  // group: colored left strip
-  if (type === 'group') {
-    const clipId = `clip-grp-${elkNode.id}`
-    const defs   = svgEl('defs', {}, g)
-    const clip   = document.createElementNS(NS, 'clipPath')
-    clip.setAttribute('id', clipId)
-    svgEl('rect', { x: 0, y: 0, width, height, rx: 5, ry: 5 }, clip)
-    defs.appendChild(clip)
-    svgEl('rect', { x: 0, y: 0, width: 5, height,
-      fill: colors.stroke, 'clip-path': `url(#${clipId})` }, g)
-  }
 
   // head: colored top bar
   if (isHead) {
@@ -197,11 +175,10 @@ function drawBlock(ax, ay, data, elkNode, isHead, nodeLayer) {
   // label
   const textY0 = isHead ? HEAD_BAR_H : 0
   const textH  = height - textY0
-  const textX  = type === 'group' ? 5 + (width - 5) / 2 : width / 2
 
   if (data.html) {
     // padding matches measure.js constants (PAD_X=16, PAD_Y=10)
-    const padX  = type === 'group' ? 21 : 16   // +5 for the left strip on group
+    const padX  = 16
     const padY  = 10
     const foX   = padX
     const foY   = textY0 + padY
@@ -214,11 +191,11 @@ function drawBlock(ax, ay, data, elkNode, isHead, nodeLayer) {
     fo.appendChild(div)
   } else {
     svgEl('text', {
-      x: textX, y: textY0 + textH / 2,
+      x: width / 2, y: textY0 + textH / 2,
       'text-anchor': 'middle', 'dominant-baseline': 'middle',
       'font-family': 'sans-serif', 'font-size': '12',
-      'font-weight': (isHead || type === 'group') ? '700' : '400',
-      fill: type === 'group' ? colors.stroke : '#1a1a1a',
+      'font-weight': isHead ? '700' : '400',
+      fill: '#1a1a1a',
     }, g).textContent = data.label || elkNode.id
   }
 
@@ -235,7 +212,7 @@ function drawBackgrounds(nodes, offX, offY, nodeMap, absMap, bgLayer) {
     const ax   = offX + n.x, ay = offY + n.y
     const data = nodeMap.get(n.id) || {}
 
-    if (data.type === 'logical-group') {
+    if (data.type === 'logical') {
       const g = svgEl('g', { transform: `translate(${ax},${ay})` }, bgLayer)
       svgEl('rect', { x: 0, y: 0, width: n.width, height: n.height, rx: 8, ry: 8,
         fill: '#f0f7ff', stroke: '#93c5fd',
@@ -246,8 +223,23 @@ function drawBackgrounds(nodes, offX, offY, nodeMap, absMap, bgLayer) {
           'font-family': 'sans-serif', 'font-size': '10', 'font-weight': '700',
           fill: '#3b82f6', 'letter-spacing': '1' }, g).textContent = data.label.toUpperCase()
       }
-      // top anchor dots (parent = blue left, pic = green right)
       svgEl('circle', { cx: n.width / 2 - 8, cy: 0, r: 3, fill: '#2c7be5' }, g)
+      svgEl('circle', { cx: n.width / 2 + 8, cy: 0, r: 3, fill: '#16a34a' }, g)
+      drawBackgrounds(n.children, ax, ay, nodeMap, absMap, bgLayer)
+    }
+
+    if (data.type === 'neck') {
+      const g = svgEl('g', { transform: `translate(${ax},${ay})` }, bgLayer)
+      svgEl('rect', { x: 0, y: 0, width: n.width, height: n.height, rx: 8, ry: 8,
+        fill: '#fff7f0', stroke: '#e67e22',
+        'stroke-width': 1.5, 'stroke-dasharray': '8,4' }, g)
+      if (data.label && data.label.trim()) {
+        svgEl('text', { x: 12, y: 18,
+          'text-anchor': 'start', 'dominant-baseline': 'middle',
+          'font-family': 'sans-serif', 'font-size': '10', 'font-weight': '700',
+          fill: '#e67e22', 'letter-spacing': '1' }, g).textContent = data.label.toUpperCase()
+      }
+      svgEl('circle', { cx: n.width / 2 - 8, cy: 0, r: 3, fill: '#e67e22' }, g)
       svgEl('circle', { cx: n.width / 2 + 8, cy: 0, r: 3, fill: '#16a34a' }, g)
       drawBackgrounds(n.children, ax, ay, nodeMap, absMap, bgLayer)
     }
@@ -277,7 +269,7 @@ function drawAllBlocks(nodes, offX, offY, nodeMap, nodeLayer, inheritedHeadId) {
     const ax   = offX + n.x, ay = offY + n.y
     const data = nodeMap.get(n.id) || {}
 
-    if (data.type === 'logical-group' || data.type === 'group') {
+    if (data.type === 'group' || data.type === 'logical' || data.type === 'neck') {
       // compound node — recurse into children, compound itself is drawn in bgLayer
       const headId = resolveHeadId(data, nodeMap)
       drawAllBlocks(n.children, ax, ay, nodeMap, nodeLayer, headId)

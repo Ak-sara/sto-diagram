@@ -36,45 +36,81 @@
   const { StoChart } = StoDiagram
   // --- sample data (mimics org_organizational_units from DB) ---
   const data = [
-    // ── Logical Directorate group ─────────────────────────────────────────
-    // type:'logical-group' = invisible container rendered as background rect
-    { id: 'dir-corp', label: 'Directorate', type: 'logical-group', parentId: null, role: 'du' },
+  {   id:'DIAS',label:'Head Office',type:'logical',head:'DU'  },
+  {   id:'DU_GRP',label:'Direktorat Utama',type:'neck',parentId:'DU'  },
+  {   id:'SDU',label:'Group SDU',type:'group',parentId:'DIAS'  },
+  {   id:'SBUCL',label:'SBU Cargo & Logistics',type:'logical', parentId:'DIAS', picId:'DC'  },
+  
+  {   id:'DU',label:'Direktur Utama',type:'block',groupId:'DIAS'  },
+  {   id:'DC',label:'Direktur Komersial',type:'block',parentId:'DU',groupId:'DIAS'  },
+  {   id:'DO',label:'Direktur Operasi',type:'block',parentId:'DU',groupId:'DIAS'  },
+  {   id:'DR',label:'Direktur Resiko',type:'block',parentId:'DU',groupId:'DIAS'  },
+  {   id:'DK',label:'Direktur Keuangan',type:'block',parentId:'DU',groupId:'DIAS'  },
+  {   id:'DH',label:'Direktur SDM',type:'block',parentId:'DU',groupId:'DIAS'  },
+  
+  {   id:'SAM',label:'SDU:Assets Management',type:'block',groupId:'SDU'  },
+  {   id:'SAS',label:'SDU:Aviation Service',type:'block',groupId:'SDU'  },
+  {   id:'SACA',label:'SDU:IAS Academy',type:'block',groupId:'SDU',picId:'DH'  },
+  {   id:'SERP',label:'SDU:ERP',type:'block',groupId:'SDU',picId:'DK'  },
+  {   id:'SFM',label:'SDU:Facility Management & Manpower Service',type:'block',groupId:'SDU',picId:'DO'  },
+  {   id:'SHO',label:'SDU:Hospitality',type:'block',groupId:'SDU'  },
 
-    // members of the logical group (groupId links them into the compound)
-    // role:'head' = Direktur Utama gets a colored top-bar to distinguish him
-    { id: 'du', label: 'Direktur Utama', type: 'block', edge: 'regular', parentId: 'dir-corp', groupId: 'dir-corp' },
-    { id: 'dc', label: 'Dir. Komersial', type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
-    { id: 'dr', label: 'Dir. Risiko',    type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
-    { id: 'do', label: 'Dir. Operasi',   type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
-    { id: 'dk', label: 'Dir. Keuangan',  type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
-    { id: 'dh', label: 'Dir. SDM',       type: 'block', edge: 'regular', parentId: 'du', groupId: 'dir-corp' },
+  {   id:'IA',label:'Internal Audit',type:'block',groupId:'DU_GRP'  },
+  {   id:'SPM',label:'Strategic Performance Management',type:'block',groupId:'DU_GRP'  },
+  {   id:'CS',label:'Corporate Secretary',type:'block',groupId:'DU_GRP'  },
+  {   id:'CST',label:'Corporate Strategy',type:'block',groupId:'DU_GRP'  },
+  
+  {   id:'CD',label:'Commercial Development',type:'block',parentId:'DC' },
+  {   id:'CF',label:'Corporate Finance',type:'block',parentId:'DK' },
+  {   id:'OPS',label:'Operation Excellence & Standarization',type:'block',parentId:'DO'   },
+  {   id:'RM',label:'Risk Management Governance and Compliance',type:'block',parentId:'DR'   },
+  {   id:'SSM',label:'Strategic Sales Marketing',type:'block',parentId:'DC' },
+  {   id:'LG',label:'Legal',type:'block',parentId:'DR' },
+  {   id:'CX',label:'Customer Experience',type:'block',parentId:'DO' },
+  {   id:'BP',label:'Business Portfolio',type:'block',parentId:'DO' },
+  {   id:'ACC',label:'Accounting',type:'block',parentId:'DK' },
+  {   id:'HB',label:'HC BP and Talent',type:'block',parentId:'DH' },
+  {   id:'HG',label:'HC Service and GA',type:'block',parentId:'DH' },
+  {   id:'HS',label:'HC Strategy and Planning',type:'block',parentId:'DH' },
+  {   id:'PC',label:'Procurement',type:'block',parentId:'DR' },
 
-    // ── neck / staff nodes (attached to Direktur Utama) ───────────────────
-    { id: 'neck-grp', label: ' ', type: 'logical-group', edge: 'neck', parentId: 'du' },
-    { id: 'ia', label: 'Internal Audit',      type: 'neck', parentId: null, groupId: 'neck-grp'},
-    { id: 'cs', label: 'Corporate Secretary', type: 'neck', parentId: null, groupId: 'neck-grp'},
+  {   id:'BPS',label:'Business Performance and Strategy',type:'block',parentId:'DO'  },
 
-    // ── children of Dir. Komersial ────────────────────────────────────────
-    { id: 'sbu', label: 'SBU Cargo & Logistics',  type: 'group', parentId: 'dir-corp', picId:'dc' },
-    { id: 'cd',  label: 'Commercial Development', type: 'block', edge: 'regular', parentId: 'dc' },
-    { id: 'cdv',  label: 'Partner Management', type: 'block', edge: 'regular', parentId: 'cd' },
-    { id: 'cdp',  label: 'Product Management', type: 'block', edge: 'regular', parentId: 'cd' },
+  {   id:'SCS',label:'Cargo Service',type:'block',parentId:'SBUCL'  },
+  {   id:'LOG',label:'Logistics',type:'block',parentId:'SBUCL'  },
+  {   id:'CBE',label:'Commercial & Business Excellence',type:'block',parentId:'SBUCL'  },
+  {   id:'CLS',label:'Cargo & Logistics Supports',type:'block',parentId:'SBUCL'  },
+  {   id:'SAF',label:'Accounting & Finance',type:'block',parentId:'CLS'  },
+  {   id:'CGSL',label:'Sales',type:'block',parentId:'SCS'  },
+  {   id:'PQ',label:'Policy and QHSE',type:'block',parentId:'CBE'  },
+  {   id:'AE',label:'Air Express',type:'block',parentId:'LOG'  },
+  {   id:'SHL',label:'HC and Legal',type:'block',parentId:'CLS'  },
+  {   id:'CI',label:'Cargo Improvement',type:'block',parentId:'SCS'  },
+  {   id:'FF',label:'Freight Forwarder',type:'block',parentId:'LOG'  },
+  {   id:'KS',label:'Key Account and Solutions',type:'block',parentId:'CBE'  },
+  {   id:'BIP',label:'Business Intelligence and Performance',type:'block',parentId:'CBE'  },
+  {   id:'RA',label:'Regulated Agent',type:'block',parentId:'SCS'  },
 
-    // inside SBU
-    { id: 'scs', label: 'Cargo Service',    type: 'block', edge: 'regular', groupId: 'sbu'},
-    { id: 'log', label: 'Logistics',        type: 'block', edge: 'regular', groupId: 'sbu' },
-    { id: 'cbe', label: 'Comm. & Biz Exc.', type: 'block', edge: 'regular', groupId: 'sbu' },
+  {   id:'BSS',label:'Baggage Service Solutions',type:'block',parentId:'LOG'  },
+  {   id:'SFS',label:'Facility and System',type:'block',parentId:'CLS'  },
+  {   id:'PO',label:'Procurement Outbound',type:'block',parentId:'CBE'  },
+  {   id:'GMCO',label:'Cargo Operation',type:'block',parentId:'SCS'  },
+  {   id:'CL',label:'Contract Logistics',type:'block',parentId:'LOG'  },
 
-    // ── children of Dir. Risiko ───────────────────────────────────────────
-    { id: 'ddr', label: 'Direktorat DR',  type: 'logical-group', parentId: 'dr'},
-    { id: 'rm', label: 'Risk Management', type: 'block', edge: 'regular', groupId: 'ddr'  },
-    { id: 'lg', label: 'Legal',           type: 'group', edge: 'regular', groupId: 'ddr',  head:'lgh' },
-    { id: 'lgh', label: 'Legal Group Head', type: 'block', edge: 'regular',groupId: 'lg'  },
-    { id: 'ldp', label: 'Unit Pidana', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh' },
-    { id: 'ldd', label: 'Unit Perdata', type: 'block', edge: 'regular', groupId: 'lg', parentId:'lgh'  },
+  {   id:'IT',label:'Information Technology',type:'logical', head:'ITGH' },
+  {   id:'ITGH',label:'IT GH', type:'block', parentId:'DH' },
+  {   id:'ITDV',label:'Development',type:'block', parentId:'ITGH' },
+  {   id:'ITGC',label:'Cyber',type:'block', parentId:'ITGH' },
+  {   id:'ITOI',label:'Operation',type:'block', parentId:'ITGH' },
+  {   id:'ITBS',label:'Business',type:'block', parentId:'ITGH' },
 
-    
-  ]
+  {   id:'KNO',label:'Regional Station KNO',type:'block',parentId:'GMCO'  },
+  {   id:'CGK',label:'Regional Station CGK',type:'block',parentId:'GMCO'  },
+  {   id:'DPS',label:'Regional Station DPS',type:'block',parentId:'GMCO'  },
+  {   id:'UPG',label:'Regional Station UPG',type:'block',parentId:'GMCO'  }
+]
+
+  
   var userCard=`<div style="display:flex;gap:10px;align-items:center;height:100%">
               <div><img src="{image}" class="sto-avatar"/></div>
               <div style="overflow:hidden">

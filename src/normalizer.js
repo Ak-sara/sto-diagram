@@ -6,11 +6,17 @@ export const DEFAULT_NODE_HEIGHT = 60
  * {
  *   id:        string
  *   label:     string
- *   type:      'block' | 'neck' | 'group' | 'logical-group'
- *   head:      string?  — id of the head child node inside a group/logical-group (gets colored top bar)
- *   groupId:   string?  — id of a group/logical-group this node is a member of (explicit; use when parentId differs)
- *   parentId:  string?  — hierarchical parent
- *   edge:      'regular' | 'neck' | null
+ *   type:      'block' | 'group' | 'logical' | 'neck'
+ *
+ *   Container membership rules:
+ *     'group'   — explicit only: a node must set groupId pointing here to be a member
+ *     'logical' — explicit (groupId) + absorbs all parentId descendants recursively;
+ *                 escape hatch: set groupId pointing to a different container
+ *     'neck'    — same as 'group' but incoming edge uses dashed-orange style
+ *
+ *   head:      string?  — id of the head child node inside a container (gets colored top bar)
+ *   groupId:   string?  — explicit container membership
+ *   parentId:  string?  — hierarchical parent; creates an edge (and triggers logical absorption)
  *   picId:     string?  — mentor/pic node id; creates a 'pic' edge
  *   html:      string?
  *   width:     number?
@@ -31,34 +37,58 @@ export function normalize(nodes) {
 
   // ── identify container nodes ───────────────────────────────────────────────
   const containerIds = new Set(
-    nodes.filter(n => n.type === 'group' || n.type === 'logical-group').map(n => n.id)
+    nodes.filter(n => n.type === 'group' || n.type === 'logical' || n.type === 'neck').map(n => n.id)
   )
 
   // containerChildren: containerId → Set<childId>  (direct members only)
   const containerChildren = new Map()
   containerIds.forEach(cid => containerChildren.set(cid, new Set()))
 
+  // phase 1: membership resolution (in priority order — first match wins)
+  //   1. head:    container's head node is always a member of that container
+  //   2. groupId: explicit membership
+  //   3. parentId → container: implicit membership for non-container nodes only
+  containerIds.forEach(cid => {
+    const headId = nodeMap.get(cid)?.head
+    if (headId && nodeMap.has(headId)) containerChildren.get(cid).add(headId)
+  })
   nodes.forEach(n => {
-    // explicit membership (logical-group)
     if (n.groupId && containerChildren.has(n.groupId)) {
       containerChildren.get(n.groupId).add(n.id)
-    }
-    // implicit membership (group or logical-group — direct parentId children)
-    if (n.parentId && containerChildren.has(n.parentId)) {
-      const parentData = nodeMap.get(n.parentId)
-      if (parentData?.type === 'group' || parentData?.type === 'logical-group') {
-        containerChildren.get(n.parentId).add(n.id)
-      }
+    } else if (!containerIds.has(n.id) && n.parentId && containerChildren.has(n.parentId)) {
+      containerChildren.get(n.parentId).add(n.id)
     }
   })
 
-  // childOf: childId → containerId (direct container)
+  // childOf: childId → containerId (rebuilt after each phase)
   const childOf = new Map()
-  containerChildren.forEach((children, cid) => {
-    children.forEach(childId => childOf.set(childId, cid))
+  const rebuildChildOf = () => {
+    childOf.clear()
+    containerChildren.forEach((children, cid) => {
+      children.forEach(childId => childOf.set(childId, cid))
+    })
+  }
+  rebuildChildOf()
+
+  // phase 1.5: auto-place containers that have no explicit groupId.
+  // A container is placed inside another container if its "anchor" node is already
+  // inside that other container. Anchor = container's own parentId, or (if none)
+  // its head node's parentId. This lets IT auto-nest inside DIAS because
+  // ITGH.parentId = DH and DH is inside DIAS — no extra groupId needed.
+  containerIds.forEach(cid => {
+    if (childOf.has(cid)) return  // already placed via groupId
+    const data = nodeMap.get(cid)
+    const anchor = data.parentId ?? nodeMap.get(data?.head)?.parentId
+    if (!anchor) return
+    const parentContainer = childOf.get(anchor)
+    if (parentContainer && parentContainer !== cid) {
+      containerChildren.get(parentContainer).add(cid)
+      childOf.set(cid, parentContainer)
+    }
   })
 
-  // ── phase 2: absorb all descendants into 'group' containers ───────────────
+  // phase 2: logical containers absorb all parentId descendants recursively.
+  // Nodes already placed (childOf set via groupId) are never moved.
   let changed = true
   while (changed) {
     changed = false
@@ -66,8 +96,7 @@ export function normalize(nodes) {
       if (!n.parentId || childOf.has(n.id) || containerIds.has(n.id)) return
       const parentContainerId = childOf.get(n.parentId)
       if (!parentContainerId) return
-      const parentContainerType = nodeMap.get(parentContainerId)?.type
-      if (parentContainerType !== 'group' && parentContainerType !== 'logical-group') return
+      if (nodeMap.get(parentContainerId)?.type !== 'logical') return
       containerChildren.get(parentContainerId).add(n.id)
       childOf.set(n.id, parentContainerId)
       changed = true
@@ -81,7 +110,7 @@ export function normalize(nodes) {
                              || (n.groupId && n.groupId === n.parentId)
       if (!isContainmentEdge) {
         const edgeId = `e_${n.parentId}_${n.id}`
-        edgeMap.set(edgeId, { id: edgeId, sources: [n.parentId], targets: [n.id], type: n.edge || 'regular' })
+        edgeMap.set(edgeId, { id: edgeId, sources: [n.parentId], targets: [n.id], type: n.type === 'neck' ? 'neck' : 'regular' })
       }
     }
     if (n.picId) {
