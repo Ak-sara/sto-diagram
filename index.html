@@ -36,46 +36,56 @@
   const { StoChart } = StoDiagram
   // --- sample data (mimics org_organizational_units from DB) ---
   const data = [
-  {   id:'DIAS',label:'Head Office',type:'logical',head:'DU'  },
-  {   id:'DU_GRP',label:'Direktorat Utama',type:'neck',parentId:'DU'  },
-  {   id:'SDU',label:'Group SDU',type:'group',parentId:'DIAS'  },
-  {   id:'SBUCL',label:'SBU Cargo & Logistics',type:'logical', parentId:'DIAS', picId:'DC'  },
-  
-  {   id:'DU',label:'Direktur Utama',type:'block',groupId:'DIAS'  },
-  {   id:'DC',label:'Direktur Komersial',type:'block',parentId:'DU',groupId:'DIAS'  },
-  {   id:'DO',label:'Direktur Operasi',type:'block',parentId:'DU',groupId:'DIAS'  },
-  {   id:'DR',label:'Direktur Resiko',type:'block',parentId:'DU',groupId:'DIAS'  },
-  {   id:'DK',label:'Direktur Keuangan',type:'block',parentId:'DU',groupId:'DIAS'  },
-  {   id:'DH',label:'Direktur SDM',type:'block',parentId:'DU',groupId:'DIAS'  },
-  
-  {   id:'SAM',label:'SDU:Assets Management',type:'block',groupId:'SDU'  },
-  {   id:'SAS',label:'SDU:Aviation Service',type:'block',groupId:'SDU'  },
-  {   id:'SACA',label:'SDU:IAS Academy',type:'block',groupId:'SDU',picId:'DH'  },
-  {   id:'SERP',label:'SDU:ERP',type:'block',groupId:'SDU',picId:'DK'  },
-  {   id:'SFM',label:'SDU:Facility Management & Manpower Service',type:'block',groupId:'SDU',picId:'DO'  },
-  {   id:'SHO',label:'SDU:Hospitality',type:'block',groupId:'SDU'  },
 
-  {   id:'IA',label:'Internal Audit',type:'block',groupId:'DU_GRP'  },
-  {   id:'SPM',label:'Strategic Performance Management',type:'block',groupId:'DU_GRP'  },
-  {   id:'CS',label:'Corporate Secretary',type:'block',groupId:'DU_GRP'  },
-  {   id:'CST',label:'Corporate Strategy',type:'block',groupId:'DU_GRP'  },
+  {   id:'NECK',label:'Direktorat Utama',type:'neck',parentId:'DU', groupId:'IAS' },
+  {   id:'IA',label:'Internal Audit',type:'block',groupId:'NECK'  },
+  {   id:'SPM',label:'Strategic Performance Management',type:'block',groupId:'NECK'  },
+  {   id:'CS',label:'Corporate Secretary',type:'block',groupId:'NECK'  },
+  {   id:'CST',label:'Corporate Strategy',type:'block',groupId:'NECK'  },
   
+  {   id:'IAS',label:'Head Office',type:'logical', head:'DIC'},
+  {   id:'DIC',label:'Directorate',type:'logical', head:'DU' },
+  
+  {   id:'DU',label:'Direktur Utama',type:'block',groupId:'DIC'  },
+  {   id:'DC',label:'Direktur Komersial',type:'block',parentId:'DU',groupId:'DIC'  },
+  {   id:'DO',label:'Direktur Operasi',type:'block',parentId:'DU',groupId:'DIC' },
+  {   id:'DR',label:'Direktur Resiko',type:'block',parentId:'DU',groupId:'DIC' },
+  {   id:'DK',label:'Direktur Keuangan',type:'block',parentId:'DU',groupId:'DIC' },
+  {   id:'DH',label:'Direktur SDM',type:'block',parentId:'DU',groupId:'DIC' },
+  
+  {   id:'DDC',label:'Directorate H',type:'logical', groupId:'IAS', head:'DC' },
   {   id:'CD',label:'Commercial Development',type:'block',parentId:'DC' },
-  {   id:'CF',label:'Corporate Finance',type:'block',parentId:'DK' },
-  {   id:'OPS',label:'Operation Excellence & Standarization',type:'block',parentId:'DO'   },
+  {   id:'SSM',label:'Strategic Sales Marketing',type:'block',parentId:'DC'},
+
+  {   id:'DDK',label:'Directorate H',type:'logical', groupId:'IAS', head:'DK' },
+  {   id:'CF',label:'Corporate Finance',type:'block',parentId:'DK',groupId:'DDK' },
+  {   id:'ACC',label:'Accounting',type:'block',parentId:'DK',groupId:'DDK' },
+
+  {   id:'DDR',label:'Directorate H',type:'logical', groupId:'IAS', head:'DR' },
   {   id:'RM',label:'Risk Management Governance and Compliance',type:'block',parentId:'DR'   },
-  {   id:'SSM',label:'Strategic Sales Marketing',type:'block',parentId:'DC' },
   {   id:'LG',label:'Legal',type:'block',parentId:'DR' },
-  {   id:'CX',label:'Customer Experience',type:'block',parentId:'DO' },
-  {   id:'BP',label:'Business Portfolio',type:'block',parentId:'DO' },
-  {   id:'ACC',label:'Accounting',type:'block',parentId:'DK' },
-  {   id:'HB',label:'HC BP and Talent',type:'block',parentId:'DH' },
-  {   id:'HG',label:'HC Service and GA',type:'block',parentId:'DH' },
-  {   id:'HS',label:'HC Strategy and Planning',type:'block',parentId:'DH' },
   {   id:'PC',label:'Procurement',type:'block',parentId:'DR' },
 
+  {   id:'DDO',label:'Directorate H',type:'logical', groupId:'IAS', head:'DO' },
+  {   id:'OPS',label:'Operation Excellence & Standarization',type:'block',parentId:'DO'   },
+  {   id:'CX',label:'Customer Experience',type:'block',parentId:'DO' },
+  {   id:'BP',label:'Business Portfolio',type:'block',parentId:'DO' },
   {   id:'BPS',label:'Business Performance and Strategy',type:'block',parentId:'DO'  },
 
+  {   id:'DDH',label:'Directorate H',type:'logical', groupId:'IAS', head:'DH' },
+  {   id:'HB',label:'HC BP and Talent',type:'block', groupId:'DDH', parentId:'DH' },
+  {   id:'HG',label:'HC Service and GA',type:'block',groupId:'DDH',parentId:'DH' },
+  {   id:'HS',label:'HC Strategy and Planning',type:'block',groupId:'DDH',parentId:'DH' },
+
+  {   id:'IT',label:'Information Technology',type:'logical',groupId:'DDH', head:'ITGH',},
+  {   id:'ITGH',label:'IT GH', type:'block',parentId:'DH'  },
+  {   id:'ITDV',label:'Development',type:'block', parentId:'ITGH' },
+  {   id:'ITGC',label:'Cyber',type:'block', parentId:'ITGH' },
+  {   id:'ITOI',label:'Operation',type:'block', parentId:'ITGH' },
+  {   id:'ITBS',label:'Business',type:'block', parentId:'ITGH' },
+
+
+  {   id:'SBUCL',label:'SBU Cargo & Logistics', type:'logical', parentId:'DIC', picId:'DC'  },
   {   id:'SCS',label:'Cargo Service',type:'block',parentId:'SBUCL'  },
   {   id:'LOG',label:'Logistics',type:'block',parentId:'SBUCL'  },
   {   id:'CBE',label:'Commercial & Business Excellence',type:'block',parentId:'SBUCL'  },
@@ -97,17 +107,21 @@
   {   id:'GMCO',label:'Cargo Operation',type:'block',parentId:'SCS'  },
   {   id:'CL',label:'Contract Logistics',type:'block',parentId:'LOG'  },
 
-  {   id:'IT',label:'Information Technology',type:'logical', head:'ITGH' },
-  {   id:'ITGH',label:'IT GH', type:'block', parentId:'DH' },
-  {   id:'ITDV',label:'Development',type:'block', parentId:'ITGH' },
-  {   id:'ITGC',label:'Cyber',type:'block', parentId:'ITGH' },
-  {   id:'ITOI',label:'Operation',type:'block', parentId:'ITGH' },
-  {   id:'ITBS',label:'Business',type:'block', parentId:'ITGH' },
 
+  
   {   id:'KNO',label:'Regional Station KNO',type:'block',parentId:'GMCO'  },
   {   id:'CGK',label:'Regional Station CGK',type:'block',parentId:'GMCO'  },
   {   id:'DPS',label:'Regional Station DPS',type:'block',parentId:'GMCO'  },
-  {   id:'UPG',label:'Regional Station UPG',type:'block',parentId:'GMCO'  }
+  {   id:'UPG',label:'Regional Station UPG',type:'block',parentId:'GMCO'  },
+
+  {   id:'SDU',label:'Group SDU',type:'group' },
+  {   id:'SAM',label:'SDU:Assets Management',type:'block',groupId:'SDU'  },
+  {   id:'SAS',label:'SDU:Aviation Service',type:'block',groupId:'SDU'  },
+  {   id:'SACA',label:'SDU:IAS Academy',type:'block',groupId:'SDU',picId:'DH'  },
+  {   id:'SERP',label:'SDU:ERP',type:'block',groupId:'SDU',picId:'DK'  },
+  {   id:'SFM',label:'SDU:Facility Management & Manpower Service',type:'block',groupId:'SDU',picId:'DO'  },
+  {   id:'SHO',label:'SDU:Hospitality',type:'block',groupId:'SDU'  },
+
 ]
 
   
