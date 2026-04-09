@@ -123,6 +123,10 @@ export class StoChart {
     function collect(nodes, offX = 0, offY = 0) {
       ;(nodes || []).forEach(n => {
         const ax = offX + n.x, ay = offY + n.y
+        if (!isFinite(ax) || !isFinite(ay)) {
+          console.warn(`[StoChart] fitView: non-finite position for node "${n.id}": x=${n.x}, y=${n.y} (parent offset ${offX},${offY}) — skipped from bounds`)
+          return
+        }
         minX = Math.min(minX, ax);  minY = Math.min(minY, ay)
         maxX = Math.max(maxX, ax + n.width); maxY = Math.max(maxY, ay + n.height)
         if (n.children && n.children.length) collect(n.children, ax, ay)

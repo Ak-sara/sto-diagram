@@ -35,6 +35,10 @@ function resolveHeadId(groupData, nodeMap) {
 function buildAbsPosMap(nodes, offX, offY, result) {
   ;(nodes || []).forEach(n => {
     const ax = offX + n.x, ay = offY + n.y
+    if (!isFinite(ax) || !isFinite(ay)) {
+      console.warn(`[StoChart] buildAbsPosMap: non-finite position for node "${n.id}": x=${n.x}, y=${n.y} (parent offset ${offX},${offY}) — skipped`)
+      return
+    }
     result.set(n.id, { x: ax, y: ay, w: n.width, h: n.height })
     if (n.children) buildAbsPosMap(n.children, ax, ay, result)
   })
@@ -67,7 +71,12 @@ const ELBOW = {
 }
 
 // ── low-level SVG path + arrowhead helpers ────────────────────────────────────
-function drawPath(pts, style, container) {
+function drawPath(pts, style, container, edgeLabel) {
+  const bad = pts.find(p => !isFinite(p.x) || !isFinite(p.y))
+  if (bad) {
+    console.warn(`[StoChart] skipped path with non-finite coordinate (${bad.x},${bad.y})${edgeLabel ? ` — edge: ${edgeLabel}` : ''}`, pts)
+    return
+  }
   const d = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ')
   svgEl('path', {
     d, fill: 'none', stroke: style.stroke,
@@ -76,7 +85,11 @@ function drawPath(pts, style, container) {
   }, container)
 }
 
-function drawArrow(end, before, style, container) {
+function drawArrow(end, before, style, container, edgeLabel) {
+  if (!isFinite(end.x) || !isFinite(end.y) || !isFinite(before.x) || !isFinite(before.y)) {
+    console.warn(`[StoChart] skipped arrow with non-finite coordinate${edgeLabel ? ` — edge: ${edgeLabel}` : ''}`, { end, before })
+    return
+  }
   const angle = Math.atan2(end.y - before.y, end.x - before.x) * 180 / Math.PI
   svgEl('polygon', {
     points: '0,-4 8,0 0,4', fill: style.stroke,
@@ -95,15 +108,22 @@ function drawEdgeGroup(edges, nodeMap, absMap, container, stagger = 0) {
 
   const srcId  = edges[0].sources[0]
   const srcPos = absMap.get(srcId)
-  if (!srcPos) return
+  if (!srcPos) {
+    console.warn(`[StoChart] edge source node not in layout: "${srcId}"`)
+    return
+  }
   const srcAnchor = anchorPoint(srcPos, nodeMap.get(srcId) || {}, true, edgeType)
   const busY      = srcAnchor.y + srcOff + stagger
 
   // Resolve all target anchor points (skip missing nodes)
   const targets = edges.flatMap(e => {
-    const tgtPos = absMap.get(e.targets[0])
-    if (!tgtPos) return []
-    return [anchorPoint(tgtPos, nodeMap.get(e.targets[0]) || {}, false, edgeType)]
+    const tgtId  = e.targets[0]
+    const tgtPos = absMap.get(tgtId)
+    if (!tgtPos) {
+      console.warn(`[StoChart] edge target node not in layout: "${tgtId}" (source: "${srcId}")`)
+      return []
+    }
+    return [anchorPoint(tgtPos, nodeMap.get(tgtId) || {}, false, edgeType)]
   })
   if (!targets.length) return
 
@@ -112,21 +132,24 @@ function drawEdgeGroup(edges, nodeMap, absMap, container, stagger = 0) {
   const minX  = Math.min(...allXs)
   const maxX  = Math.max(...allXs)
 
+  const tgtLabels = edges.map(e => e.targets[0]).join(', ')
+  const edgeLabel = `${srcId} → ${tgtLabels}`
+
   // 1. Source stub down to bus
-  drawPath([srcAnchor, { x: srcAnchor.x, y: busY }], style, container)
+  drawPath([srcAnchor, { x: srcAnchor.x, y: busY }], style, container, edgeLabel)
 
   // 2. Horizontal bus
-  if (maxX > minX) drawPath([{ x: minX, y: busY }, { x: maxX, y: busY }], style, container)
+  if (maxX > minX) drawPath([{ x: minX, y: busY }, { x: maxX, y: busY }], style, container, edgeLabel)
 
   // 3. Vertical drop from bus to each target (with target stub + arrowhead)
   targets.forEach(end => {
     const elbowTgtY = end.y - tgtOff
     if (elbowTgtY > busY) {
-      drawPath([{ x: end.x, y: busY }, { x: end.x, y: elbowTgtY }, end], style, container)
-      drawArrow(end, { x: end.x, y: elbowTgtY }, style, container)
+      drawPath([{ x: end.x, y: busY }, { x: end.x, y: elbowTgtY }, end], style, container, edgeLabel)
+      drawArrow(end, { x: end.x, y: elbowTgtY }, style, container, edgeLabel)
     } else {
-      drawPath([{ x: end.x, y: busY }, end], style, container)
-      drawArrow(end, { x: end.x, y: busY }, style, container)
+      drawPath([{ x: end.x, y: busY }, end], style, container, edgeLabel)
+      drawArrow(end, { x: end.x, y: busY }, style, container, edgeLabel)
     }
   })
 }
@@ -210,6 +233,10 @@ function drawBlock(ax, ay, data, elkNode, isHead, nodeLayer) {
 function drawBackgrounds(nodes, offX, offY, nodeMap, absMap, bgLayer) {
   ;(nodes || []).forEach(n => {
     const ax   = offX + n.x, ay = offY + n.y
+    if (!isFinite(ax) || !isFinite(ay)) {
+      console.warn(`[StoChart] drawBackgrounds: non-finite position for node "${n.id}": x=${n.x}, y=${n.y} — skipped`)
+      return
+    }
     const data = nodeMap.get(n.id) || {}
 
     if (data.type === 'logical') {
@@ -267,6 +294,10 @@ function drawBackgrounds(nodes, offX, offY, nodeMap, absMap, bgLayer) {
 function drawAllBlocks(nodes, offX, offY, nodeMap, nodeLayer, inheritedHeadId) {
   ;(nodes || []).forEach(n => {
     const ax   = offX + n.x, ay = offY + n.y
+    if (!isFinite(ax) || !isFinite(ay)) {
+      console.warn(`[StoChart] drawAllBlocks: non-finite position for node "${n.id}": x=${n.x}, y=${n.y} — skipped`)
+      return
+    }
     const data = nodeMap.get(n.id) || {}
 
     if (data.type === 'group' || data.type === 'logical' || data.type === 'neck') {
